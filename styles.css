@@ -218,6 +218,14 @@ button.primary {
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.13);
 }
 
+.card-row.locked {
+  opacity: 0.65;
+}
+
+.card-row.locked .token {
+  cursor: not-allowed;
+}
+
 .token,
 .gap-slot {
   border-radius: 10px;
@@ -279,6 +287,14 @@ button.primary {
 .feedback {
   min-height: 1.6em;
   font-weight: 700;
+}
+
+.feedback.feedback-inline {
+  min-height: 0;
+  margin: 0 4px 0 0;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .feedback.ok {

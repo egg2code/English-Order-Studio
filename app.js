@@ -174,6 +174,7 @@ async function initialize() {
   loadSettings();
   await preloadAllGrades();
   applyStaticLabels();
+  placeFeedbackNearNextButton();
   bindEvents();
   const singleRequest = getSingleQuestionRequest();
   if (singleRequest) {
@@ -191,6 +192,18 @@ async function initialize() {
 
   showScreen("home");
   refreshAchievementDisplay();
+}
+
+function placeFeedbackNearNextButton() {
+  if (!ui.feedback || !ui.nextBtn) {
+    return;
+  }
+  const actionRow = ui.nextBtn.parentElement;
+  if (!actionRow) {
+    return;
+  }
+  ui.feedback.classList.add("feedback-inline");
+  actionRow.insertBefore(ui.feedback, ui.nextBtn);
 }
 
 function applyStaticLabels() {
@@ -305,6 +318,9 @@ function bindEvents() {
   ui.wordBank.addEventListener("drop", (event) => {
     event.preventDefault();
     ui.wordBank.classList.remove("drag-over");
+    if (isAnswerLocked()) {
+      return;
+    }
     if (!draggingToken || draggingToken.source !== "answer") {
       return;
     }
@@ -329,6 +345,9 @@ function bindEvents() {
   ui.answerZone.addEventListener("drop", (event) => {
     event.preventDefault();
     ui.answerZone.classList.remove("drag-over");
+    if (isAnswerLocked()) {
+      return;
+    }
     if (!draggingToken) {
       return;
     }
@@ -340,6 +359,9 @@ function bindEvents() {
     renderWordAreas();
   });
   ui.answerZone.addEventListener("click", (event) => {
+    if (isAnswerLocked()) {
+      return;
+    }
     const target = event.target;
     if (!(target instanceof Element)) {
       return;
@@ -729,6 +751,7 @@ function renderTranslation() {
 }
 
 function renderWordAreas() {
+  updateAnswerLockState();
   renderWordBank();
   renderAnswerZone();
 }
@@ -759,12 +782,16 @@ function createTokenElement(token, source, isWrong) {
   if (isWrong) {
     item.classList.add("wrong");
   }
-  item.draggable = true;
+  item.draggable = !isAnswerLocked();
   item.dataset.id = token.id;
   item.dataset.source = source;
   item.innerHTML = `<strong>${token.text}</strong><small>${getTokenLabel(token)}</small>`;
 
   item.addEventListener("dragstart", (event) => {
+    if (isAnswerLocked()) {
+      event.preventDefault();
+      return;
+    }
     if (event.dataTransfer) {
       event.dataTransfer.setData("text/plain", token.id);
       event.dataTransfer.effectAllowed = "move";
@@ -781,6 +808,9 @@ function createTokenElement(token, source, isWrong) {
 
   if (source === "bank") {
     item.addEventListener("click", () => {
+      if (isAnswerLocked()) {
+        return;
+      }
       saveSnapshot();
       insertTokenToAnswer({ id: token.id, source: "bank" }, appState.answer.length);
       renderWordAreas();
@@ -796,6 +826,9 @@ function createGapElement(index) {
   gap.dataset.index = index;
 
   gap.addEventListener("dragover", (event) => {
+    if (isAnswerLocked()) {
+      return;
+    }
     event.preventDefault();
     clearGapHighlight();
     gap.classList.add("active");
@@ -807,6 +840,9 @@ function createGapElement(index) {
   });
 
   gap.addEventListener("drop", (event) => {
+    if (isAnswerLocked()) {
+      return;
+    }
     event.preventDefault();
     event.stopPropagation();
     gap.classList.remove("active");
@@ -823,6 +859,16 @@ function createGapElement(index) {
   });
 
   return gap;
+}
+
+function isAnswerLocked() {
+  return !ui.nextBtn.classList.contains("hidden");
+}
+
+function updateAnswerLockState() {
+  const locked = isAnswerLocked();
+  ui.wordBank.classList.toggle("locked", locked);
+  ui.answerZone.classList.toggle("locked", locked);
 }
 
 function activateNearestGap(clientX) {
@@ -951,7 +997,7 @@ function checkAnswer() {
 
   if (wrongPositions.length === 0) {
     appState.correctCount += 1;
-    ui.feedback.textContent = "";
+    ui.feedback.textContent = "\u6b63\u89e3\uff01";
     ui.feedback.className = "feedback ok";
     appState.wrongPositions = new Set();
     updateProgress(question.id, true);
