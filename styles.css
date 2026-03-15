@@ -277,6 +277,23 @@ button.primary {
   background: rgba(8, 145, 178, 0.15);
 }
 
+.token.gap-end-active {
+  position: relative;
+}
+
+.token.gap-end-active::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  top: 6px;
+  width: 16px;
+  height: 34px;
+  border: 2px solid #0891b2;
+  background: rgba(8, 145, 178, 0.15);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
 .action-row {
   display: flex;
   flex-wrap: wrap;

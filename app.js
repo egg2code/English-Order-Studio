@@ -335,7 +335,7 @@ function bindEvents() {
   ui.answerZone.addEventListener("dragover", (event) => {
     event.preventDefault();
     ui.answerZone.classList.add("drag-over");
-    activateNearestGap(event.clientX);
+    activateNearestGap(event.clientX, event.clientY);
   });
   ui.answerZone.addEventListener("dragleave", () => {
     ui.answerZone.classList.remove("drag-over");
@@ -871,25 +871,103 @@ function updateAnswerLockState() {
   ui.answerZone.classList.toggle("locked", locked);
 }
 
-function activateNearestGap(clientX) {
+function activateNearestGap(clientX, clientY) {
   const gaps = [...ui.answerZone.querySelectorAll(".gap-slot")];
   if (gaps.length === 0) {
     return;
   }
-  let nearest = gaps[0];
-  let best = Number.POSITIVE_INFINITY;
-  gaps.forEach((gap) => {
-    const rect = gap.getBoundingClientRect();
-    const center = rect.left + (rect.width / 2);
-    const dist = Math.abs(clientX - center);
-    if (dist < best) {
-      best = dist;
-      nearest = gap;
+  const answerTokens = [...ui.answerZone.querySelectorAll(".token[data-source='answer']")];
+  if (answerTokens.length === 0) {
+    activateGapByIndex(gaps, 0, false);
+    return;
+  }
+  const rects = answerTokens.map((node) => node.getBoundingClientRect());
+  const candidates = buildGapCandidates(rects);
+
+  let best = candidates[0];
+  let bestScore = Number.POSITIVE_INFINITY;
+  candidates.forEach((candidate) => {
+    const dx = Math.abs(clientX - candidate.x);
+    const dy = Math.abs(clientY - candidate.y);
+    const score = dx + (dy * 1.4);
+    if (score < bestScore) {
+      bestScore = score;
+      best = candidate;
     }
   });
+
+  activateGapByIndex(gaps, best.index, best.visual === "row-end");
+}
+
+function activateGapByIndex(gaps, index, showAtPrevRowEnd) {
   clearGapHighlight();
-  nearest.classList.add("active");
-  appState.activeGapIndex = Number(nearest.dataset.index);
+  appState.activeGapIndex = index;
+
+  if (showAtPrevRowEnd && index > 0) {
+    const answerTokens = [...ui.answerZone.querySelectorAll(".token[data-source='answer']")];
+    const prevToken = answerTokens[index - 1];
+    if (prevToken) {
+      prevToken.classList.add("gap-end-active");
+      return;
+    }
+  }
+
+  const target = gaps.find((gap) => Number(gap.dataset.index) === index);
+  if (target) {
+    target.classList.add("active");
+  }
+}
+
+function buildGapCandidates(tokenRects) {
+  const count = tokenRects.length;
+  const list = [];
+  const first = tokenRects[0];
+  const last = tokenRects[count - 1];
+
+  list.push({
+    index: 0,
+    x: first.left - 10,
+    y: first.top + (first.height / 2),
+    visual: "gap",
+  });
+
+  for (let i = 1; i < count; i += 1) {
+    const prev = tokenRects[i - 1];
+    const curr = tokenRects[i];
+    const wrapped = curr.top > prev.top + 4;
+    if (wrapped) {
+      // Same insertion index can be targeted from both row edges.
+      list.push({
+        index: i,
+        x: prev.right + 10,
+        y: prev.top + (prev.height / 2),
+        visual: "row-end",
+      });
+      list.push({
+        index: i,
+        x: curr.left - 10,
+        y: curr.top + (curr.height / 2),
+        visual: "gap",
+      });
+      continue;
+    }
+
+    list.push({
+      index: i,
+      x: (prev.right + curr.left) / 2,
+      y: (prev.top + curr.top + prev.height) / 2,
+      visual: "gap",
+    });
+  }
+
+  list.push({
+    index: count,
+    x: last.right + 10,
+    y: last.top + (last.height / 2),
+    visual: "row-end",
+  });
+
+  return list;
 }
 
 function insertTokenToAnswer(payload, targetIndex) {
@@ -1778,6 +1856,7 @@ function saveSettings() {
 
 function clearGapHighlight() {
   document.querySelectorAll(".gap-slot.active").forEach((node) => node.classList.remove("active"));
+  document.querySelectorAll(".token.gap-end-active").forEach((node) => node.classList.remove("gap-end-active"));
 }
 
 function shuffle(items) {
