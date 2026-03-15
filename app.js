@@ -339,6 +339,27 @@ function bindEvents() {
     clearGapHighlight();
     renderWordAreas();
   });
+  ui.answerZone.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+    const tokenNode = target.closest(".token");
+    if (!tokenNode || tokenNode.dataset.source !== "answer") {
+      return;
+    }
+    const tokenId = tokenNode.dataset.id;
+    if (!tokenId) {
+      return;
+    }
+    saveSnapshot();
+    const moved = removeTokenFromAnswer(tokenId);
+    if (!moved) {
+      return;
+    }
+    appState.wordBank.push(moved);
+    renderWordAreas();
+  });
 }
 
 async function startQuiz(grade) {
