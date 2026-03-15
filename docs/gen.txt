@@ -1,0 +1,27 @@
+data/*.js のJSONを読み込み、sentenceの英文に対して、以下を解析した結果を追記ください
+**必ず1件ずつ処理して、Pythonを使った一括処理をしないでください**
+
+・各単語毎の品詞情報 > pos[] に PRON, NOUN といった配列を追記or更新
+
+・構造 > structure に以下のようなテキスト形式で追記or更新
+　- 従属接続詞によるまとまりの区切りで改行してインデントを付ける
+　- 等位接続詞で結ばれる前半のまとまりの前で改行し、前半 改行・等位接続詞 改行・後半改行とする
+　- 名詞句・節は <> で括る
+　- 形容詞句・節は [] で括る
+　- 副詞句・節は () で括る
+　- {<The book>}S のように主節のSVOCは{}で括ってその後続けてSVOCを記載
+　- {<The book>}S' のように従属節のSVOCは{}で括ってその後続けてS'V'O'C'を記載
+　- M,A (M',A')は判定不要で、{}も含め追記してはいけない
+　- 等位接続詞で結ばれるSVOCはまとめる {A and B}O
+　- SVOO (S'V'O'O')で O が２つ並んだ時は {}O {}O と２つに分ける
+　- structureには、カンマ、ピリオドも含む
+　- sentenceの文字がstructure上で欠けたり、重複したり、大文字・小文字を変化させたりしないこと
+　- structure で順番を入れ替えないこと
+　  (Can you play > you Can play などとせず、この場合Canは動詞としなくてOK)
+
+・出力形式例
+{
+  "sentence": "He gave me a book.",
+  "pos": ["PRON", "VERB", "PRON", "DET", "NOUN", "PUNCT"],
+  "structure": "{<He>}S {gave}V {<me>}O {<a book>}O ."
+}

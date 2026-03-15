@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>English Game</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-shape shape-1"></div>
+  <div class="bg-shape shape-2"></div>
+
+  <main class="app-shell">
+    <header class="app-header">
+      <h1>English Order Studio</h1>
+      <p>????????????</p>
+    </header>
+
+    <section id="home-screen" class="screen active">
+      <h2>学年を選んで開始</h2>
+      <div id="grade-grid" class="grade-grid">
+        <button type="button" class="grade-btn" data-grade="1">
+          中1
+          <small id="rate-grade-1">達成率: --</small>
+        </button>
+        <button type="button" class="grade-btn" data-grade="2">
+          中2
+          <small id="rate-grade-2">達成率: --</small>
+        </button>
+        <button type="button" class="grade-btn" data-grade="3">
+          中3
+          <small id="rate-grade-3">達成率: --</small>
+        </button>
+        <button type="button" class="grade-btn" data-grade="4">
+          ?1
+          <small id="rate-grade-4">???: --</small>
+        </button>
+        <button type="button" class="grade-btn" data-grade="5">
+          ?2
+          <small id="rate-grade-5">???: --</small>
+        </button>
+        <button type="button" class="grade-btn" data-grade="6">
+          ?3
+          <small id="rate-grade-6">???: --</small>
+        </button>
+      </div>
+
+      <div class="setting-panel">
+<label class="toggle-item">
+          <input type="checkbox" id="sound-toggle" checked>
+          効果音を鳴らす
+        </label>
+</div>
+
+      <div class="home-links">
+        <a href="pos.html">品詞解説ページを見る</a>
+        <a href="structure.html">文構造解説ページを見る</a>
+        <button id="open-problem-list-btn" type="button">問題一覧ページを見る</button>
+      </div>
+
+      <div class="action-row">
+        <button id="reset-progress-btn" type="button" class="danger-outline">学習状況（達成率）をリセット</button>
+      </div>
+    </section>
+
+    <section id="list-screen" class="screen">
+<h2>問題一覧</h2>
+      <p>学年・表示モードを切り替えて、1問だけ解けます</p>
+
+      <div class="grade-grid">
+        <button type="button" class="grade-filter-btn primary" data-grade="1">中1</button>
+        <button type="button" class="grade-filter-btn" data-grade="2">中2</button>
+        <button type="button" class="grade-filter-btn" data-grade="3">中3</button>
+        <button type="button" class="grade-filter-btn" data-grade="4">?1</button>
+        <button type="button" class="grade-filter-btn" data-grade="5">?2</button>
+        <button type="button" class="grade-filter-btn" data-grade="6">?3</button>
+      </div>
+
+      <div class="setting-panel">
+        <label class="toggle-item">
+          <input type="radio" name="lang-mode" value="en" checked>
+          英語のみ
+        </label>
+        <label class="toggle-item">
+          <input type="radio" name="lang-mode" value="ja">
+          日本語のみ
+        </label>
+        <label class="toggle-item">
+          <input type="radio" name="lang-mode" value="both">
+          英語＆日本語
+        </label>
+        <label class="toggle-item">
+          <input type="radio" name="lang-mode" value="full">
+          英語＆日本語＆品詞＆文構造ガイド
+        </label>
+      </div>
+
+      <div class="action-row">
+        <button id="back-home-from-list-top-btn" type="button">?????????</button>
+      </div>
+      <p id="problem-count"></p>
+      <div id="problem-list"></div>
+
+      <div class="action-row">
+        <button id="back-home-from-list-btn" type="button">トップページへ戻る</button>
+      </div>
+    </section>
+
+    <section id="quiz-screen" class="screen">
+      <div class="quiz-top-row">
+        <p id="question-progress">1 / 10</p>
+        <p id="score-mini">正解 0 ・ 不正解 0</p>
+        <p id="current-grade-label">レベル: 中1</p>
+        <p id="grade-achievement">達成率: --</p>
+      </div>
+
+      <article class="question-card">
+        <h2 id="question-title">問題</h2>
+        <p id="jp-meaning" class="jp-meaning"></p>
+
+        <div>
+          <h3>語句カード <small class="inline-note">（1単語としての品詞は正確でない場合があります。句として正しい品詞になるためです）</small></h3>
+          <div id="word-bank" class="drop-surface card-row bank-surface"></div>
+        </div>
+
+        <div>
+          <h3>解答欄（クリックまたはドラッグで挿入）</h3>
+          <div id="answer-zone" class="drop-surface card-row answer-surface"></div>
+        </div>
+
+        <div class="action-row">
+          <button id="undo-btn" type="button">1手戻す</button>
+          <button id="clear-btn" type="button">全消去</button>
+          <button id="check-btn" type="button" class="primary">回答する</button>
+          <button id="next-btn" type="button" class="primary hidden">次の問題へ</button>
+        </div>
+
+        <p id="feedback" class="feedback"></p>
+      </article>
+
+      <article id="structure-card" class="structure-card hidden">
+        <h3>文構造ガイド</h3>
+        <div id="structure-summary" class="structure-summary"></div>
+        <div id="structure-guide" class="structure-guide"></div>
+      </article>
+
+      <div class="quiz-exit-wrap">
+        <button id="quit-quiz-btn" type="button" class="danger-outline">トップへ戻る</button>
+      </div>
+    </section>
+
+    <section id="result-screen" class="screen">
+      <h2>結果</h2>
+      <p id="final-score" class="final-score"></p>
+      <p id="final-detail"></p>
+      <div id="review-list" class="review-list"></div>
+
+      <div class="action-row">
+        <button id="retry-btn" type="button" class="primary">同じ学年でもう1セット</button>
+        <button id="back-home-btn" type="button">トップへ戻る</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="data/questions_grade1.js" defer></script>
+  <script src="data/questions_grade2.js" defer></script>
+  <script src="data/questions_grade3.js" defer></script>
+  <script src="data/questions_grade4.js" defer></script>
+  <script src="data/questions_grade5.js" defer></script>
+  <script src="data/questions_grade6.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
