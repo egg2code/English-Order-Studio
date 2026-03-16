@@ -1640,7 +1640,6 @@ function showScreen(key) {
 }
 
 function weightedSample(questions, count) {
-  const unseenTarget = Math.min(count, Math.max(0, Math.ceil(count * 0.4)));
   const unseenPool = [];
   const seenPool = [];
 
@@ -1655,17 +1654,14 @@ function weightedSample(questions, count) {
   });
 
   const picked = [];
-  pickLowDifficultyInto(picked, unseenPool, unseenTarget);
-  pickWeightedInto(picked, seenPool, count - picked.length);
-
-  if (picked.length < count) {
-    pickLowDifficultyInto(picked, unseenPool, count - picked.length);
+  if (unseenPool.length > 0) {
+    // If there are unseen questions, use only unseen ones.
+    pickLowDifficultyInto(picked, unseenPool, Math.min(count, unseenPool.length));
+    return picked;
   }
 
-  if (picked.length < count) {
-    pickWeightedInto(picked, seenPool, count - picked.length);
-  }
-
+  // Once all questions have been seen, fall back to weighted sampling.
+  pickWeightedInto(picked, seenPool, count);
   return picked;
 }
 
